@@ -4,6 +4,7 @@ function App() {
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleFileChange = (e) => {
+    console.log("Selected file:", e.target.files[0]);
     setSelectedFile(e.target.files[0]);
   };
 
@@ -15,6 +16,7 @@ function App() {
 
     const formData = new FormData();
     formData.append("file", selectedFile);
+    console.log("Uploading file to API...");
 
     try {
       const response = await fetch("https://firebase-api-tplg.onrender.com/upload", {
@@ -22,9 +24,16 @@ function App() {
         body: formData,
       });
 
-      if (!response.ok) throw new Error("Upload failed");
+      console.log("Upload response status:", response.status);
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error("Upload failed: " + errText);
+      }
 
       const blob = await response.blob();
+      console.log("Received blob of size:", blob.size);
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -33,9 +42,11 @@ function App() {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
+
+      console.log("Download triggered.");
     } catch (err) {
-      console.error(err);
-      alert("Something went wrong.");
+      console.error("Upload error:", err);
+      alert("Something went wrong: " + err.message);
     }
   };
 
