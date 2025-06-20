@@ -16,7 +16,7 @@ function App() {
 
     const formData = new FormData();
     formData.append("file", selectedFile);
-    console.log("Uploading file to API...");
+    console.log("Uploading...");
 
     try {
       const response = await fetch("https://firebase-api-tplg.onrender.com/upload", {
@@ -24,7 +24,7 @@ function App() {
         body: formData,
       });
 
-      console.log("Upload response status:", response.status);
+      console.log("Response status:", response.status);
 
       if (!response.ok) {
         const errText = await response.text();
@@ -32,7 +32,9 @@ function App() {
       }
 
       const blob = await response.blob();
-      console.log("Received blob of size:", blob.size);
+      if (blob.size === 0) {
+        throw new Error("Received empty file. Check backend logs.");
+      }
 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
